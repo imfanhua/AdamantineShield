@@ -21,14 +21,14 @@ public class InventoryQueueEntry extends QueueEntry {
 	private static final String QUERY = "INSERT INTO AS_Container (x, y, z, world, type, slot, cause, id, count, data, time) "
 			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 	
-	private TileEntityCarrier carrier;
+	private Location<World> carrier;
 	private int slot;
 	private ItemStackSnapshot item;
 	private ActionType type;
 	private Player cause;
 	private long timestamp;
 	
-	public InventoryQueueEntry(TileEntityCarrier carrier, int slot, ItemStackSnapshot item, ActionType type, Player cause, long timestamp) {
+	public InventoryQueueEntry(Location<World> carrier, int slot, ItemStackSnapshot item, ActionType type, Player cause, long timestamp) {
 		this.carrier = carrier;
 		this.slot = slot;
 		this.item = item;
@@ -39,13 +39,11 @@ public class InventoryQueueEntry extends QueueEntry {
 	
 	@Override
 	public void writeToConnection(Connection c) throws SQLException {
-		Location<World> loc = carrier.getLocation();
-		
 		PreparedStatement ps = c.prepareStatement(QUERY);
-		ps.setInt(1, loc.getBlockX());
-		ps.setInt(2, loc.getBlockY());
-		ps.setInt(3, loc.getBlockZ());
-		ps.setInt(4, Database.worldCache.getDataId(c, carrier.getWorld().getUniqueId().toString()));
+		ps.setInt(1, carrier.getBlockX());
+		ps.setInt(2, carrier.getBlockY());
+		ps.setInt(3, carrier.getBlockZ());
+		ps.setInt(4, Database.worldCache.getDataId(c, carrier.getExtent().getUniqueId().toString()));
 		ps.setByte(5, (byte) type.ordinal());
 		ps.setInt(6, slot);
 		ps.setInt(7, Database.causeCache.getDataId(c, cause.getUniqueId().toString()));
